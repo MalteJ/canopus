@@ -29,8 +29,9 @@ func SendMessageTo(msg *Message, conn CanopusConnection, addr *net.UDPAddr) (Coa
 	if msg.MessageType == TYPE_NONCONFIRMABLE {
 		return NewResponse(NewEmptyMessage(msg.MessageId), err), err
 	} else {
-		conn.SetReadDeadline(time.Now().Add(time.Second * 2))
+		conn.SetReadDeadline(time.Now().Add(time.Second * DEFAULT_ACK_TIMEOUT))
 		buf, n, err := conn.Read()
+
 		if err != nil {
 			return nil, err
 		}
