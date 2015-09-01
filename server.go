@@ -167,11 +167,11 @@ func (s *CoapServer) handleMessage(msgBuf []byte, conn *net.UDPConn, addr *net.U
 		if msg.MessageType != TYPE_RESET {
 			// Unsupported Method
 			if msg.Code != GET && msg.Code != POST && msg.Code != PUT && msg.Code != DELETE {
-				ret := NotImplementedMessage(msg.MessageId, TYPE_ACKNOWLEDGEMENT)
-				ret.CloneOptions(msg, OPTION_URI_PATH, OPTION_CONTENT_FORMAT)
+				resp := NotImplementedMessage(msg.MessageId, TYPE_ACKNOWLEDGEMENT)
+				resp.CloneOptions(msg, OPTION_URI_PATH, OPTION_CONTENT_FORMAT)
 
-				s.events.Message(ret, false)
-				SendMessageTo(ret, NewCanopusUDPConnection(conn), addr)
+				s.events.Message(resp, false)
+				SendMessageTo(resp, NewCanopusUDPConnection(conn), addr)
 				return
 			}
 
