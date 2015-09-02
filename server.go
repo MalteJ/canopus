@@ -31,7 +31,7 @@ func NewServer(localAddr *net.UDPAddr, remoteAddr *net.UDPAddr) *CoapServer {
 		observations:          make(map[string][]*Observation),
 		fnHandleCoapCoapProxy: NullProxyHandler,
 		fnHandleCoapHttpProxy: NullProxyHandler,
-		queue:				   NewDefaultQueue(),
+		queue: NewDefaultQueue(),
 	}
 }
 
@@ -50,7 +50,7 @@ type CoapServer struct {
 	fnHandleCoapHttpProxy ProxyHandler
 	fnHandleCoapCoapProxy ProxyHandler
 
-	queue		Queue
+	queue Queue
 }
 
 func (s *CoapServer) Start() {
@@ -116,6 +116,7 @@ func (s *CoapServer) serveServer() {
 	s.events.Started(s)
 
 	s.handleMessageIdPurge()
+	s.queue.Start()
 
 	readBuf := make([]byte, BUF_SIZE)
 	for {

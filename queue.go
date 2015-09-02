@@ -1,21 +1,23 @@
 package canopus
+
 import (
-	"time"
 	"container/heap"
+	"time"
 )
 
 type Item struct {
-	value    	*CoapRequest 	// The value of the item; arbitrary.
-	priority 	int    			// The priority of the item in the queue.
-								// The index is needed by update and is maintained by the heap.Interface methods.
-	index 		int 			// The index of the item in the heap.
-	retries 	int
-	ts 			*time.Time
+	value    CoapRequest
+	priority int
+	index    int
+	retries  int
+	ts       *time.Time
 }
 
 type PriorityQueue []*Item
 
-func (pq PriorityQueue) Len() int { return len(pq) }
+func (pq PriorityQueue) Len() int {
+	return len(pq)
+}
 
 func (pq PriorityQueue) Less(i, j int) bool {
 	// We want Pop to give us the highest, not lowest, priority so we use greater than here.
@@ -45,7 +47,7 @@ func (pq *PriorityQueue) Pop() interface{} {
 }
 
 // update modifies the priority and value of an Item in the queue.
-func (pq *PriorityQueue) update(item *Item, value string, priority int) {
+func (pq *PriorityQueue) update(item *Item, value CoapRequest, priority int) {
 	item.value = value
 	item.priority = priority
 	heap.Fix(pq, item.index)
@@ -54,36 +56,47 @@ func (pq *PriorityQueue) update(item *Item, value string, priority int) {
 type Queue interface {
 	Start()
 	Stop()
-	Push(*Item)
-	Pop()
+	Push(*Item, int)
+	Pop() *Item
 	Clear()
 	Get(string) *Item
 	Send() error
 }
 
-func NewDefaultQueue() Queue {
-	return &DefaultQueue{}
+func NewDefaultQueue() *DefaultQueue {
+	return &DefaultQueue{
+		priorityQueue: new(PriorityQueue),
+	}
 }
 
 type DefaultQueue struct {
-	priorityQueue 	*PriorityQueue
+	priorityQueue *PriorityQueue
 }
 
 func (q *DefaultQueue) Start() {
-	// start gofunc for sending
-	
+	heap.Init(q.priorityQueue)
+	ticker := time.NewTicker(3 * time.Second)
+	go func() {
+		for {
+			select {
+			case <-ticker.C:
+				q.Send()
+			}
+		}
+	}()
 }
 
 func (q *DefaultQueue) Stop() {
 
 }
 
-func (q *DefaultQueue) Push(i *Item) {
-	q.priorityQueue.Push(i)
+func (q *DefaultQueue) Push(i *Item, priority int) {
+	heap.Push(q.priorityQueue, i)
+	q.priorityQueue.update(i, i.value, priority)
 }
 
 func (q *DefaultQueue) Pop() *Item {
-	return q.priorityQueue.Pop()
+	return q.priorityQueue.Pop().(*Item)
 }
 
 func (q *DefaultQueue) Clear() {
@@ -97,7 +110,6 @@ func (q *DefaultQueue) Get(id string) *Item {
 func (q *DefaultQueue) Send() error {
 	return nil
 }
-
 
 /*
 	Operations
@@ -118,4 +130,4 @@ func (q *DefaultQueue) Send() error {
 				increment max_retransmit
 
 
- */
+*/

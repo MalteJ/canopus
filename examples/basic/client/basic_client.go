@@ -25,7 +25,7 @@ func main() {
 		}
 	})
 
-	client.OnError(func(err error){
+	client.OnError(func(err error) {
 		log.Println("An error occured")
 		log.Println(err)
 	})

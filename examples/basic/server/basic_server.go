@@ -28,7 +28,6 @@ func main() {
 		return res
 	})
 
-
 	server.Get("/basic", func(req CoapRequest) CoapResponse {
 		msg := NewMessageOfType(TYPE_ACKNOWLEDGEMENT, req.GetMessage().MessageId)
 		msg.SetStringPayload("Acknowledged")
@@ -52,7 +51,7 @@ func main() {
 		return res
 	})
 
-	server.OnMessage(func(msg *Message, inbound bool){
+	server.OnMessage(func(msg *Message, inbound bool) {
 		PrintMessage(msg)
 	})
 
